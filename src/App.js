@@ -1,5 +1,6 @@
 import Header from "./componets/Header";
 import Movies from "./componets/Movies";
+
 import {BrowserRouter, Route, Switch, Redirect} from 'react-router-dom';
 
 function App() {
@@ -8,7 +9,7 @@ function App() {
         <BrowserRouter>
           <Header/>
           <Switch>
-          <Route
+            <Route
                 exact
                 path="/"
                 render={() => {

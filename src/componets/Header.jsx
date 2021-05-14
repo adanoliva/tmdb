@@ -5,7 +5,6 @@ const Header = props => {
     const history = useHistory();
     const [textSearch,setTextSearch] = useState('');
     const search = event  => {
-        console.log(textSearch.length );
         if(textSearch.length > 0) {
             history.push('/search',{text: textSearch});
         }

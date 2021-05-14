@@ -2,17 +2,21 @@ import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import Movie from "./Movie";
 import ReactPaginate from 'react-paginate';
-import {Redirect, Route} from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux'
+import { listing } from '../reducers/listSlice'
 
 const Movies = props => {
-    const [movies, setMovies] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
     const [activePage, setActivePage] = useState(1);
-    const movieType =props.match.params.movieType?props.match.params.movieType:[];
+    const movieType =props.match.params.movieType;
     const [movieTypeAnt, setMovietypeAnt] = useState('');
+
+    const listMovies = useSelector((state) => state.list.value)
+    const dispatch = useDispatch()
 
     const apikey = '1a328f10e026656d2ac01c360720f5f9';
     var title = '';
+
     const [text,setText] = useState('');
       
     switch (movieType) {
@@ -31,32 +35,31 @@ const Movies = props => {
     }
 
     useEffect(() => {
-        if (movieType !== movieTypeAnt)
+        if (movieType != movieTypeAnt)
         {
             setMovietypeAnt(movieType);
             setActivePage(1);
         }
-        setMovies([]);
         searchMovies();
            
     }, [movieType,activePage]);
 
     const handlePageChange = (e) => {
-        console.log(e);
         const selectedPage = e.selected;
+
         setActivePage(selectedPage+1);
     }
 
     const searchMovies = () => {
-        console.log(movieType+activePage);
-        if (movieType === 'search') {
+       
+        if (movieType == 'search') {
             setText(props.location.state.text);
             if(props.location.state.text.length > 0) {
                 axios.get('https://api.themoviedb.org/3/search/movie?api_key='
                 +apikey+'&query='+props.location.state.text
                 +'&language=es-ES&page='+activePage)
                 .then(res => { 
-                    setMovies(res.data.results);
+                    dispatch(listing({payload: res.data.results}))
                     setTotalPages(res.data.total_pages);
                 })
                 .catch(console.error);
@@ -67,41 +70,59 @@ const Movies = props => {
             axios.get('https://api.themoviedb.org/3/movie/'
             +movieType+'?api_key='+apikey+'&language=es-ES&page='+activePage)
             .then(res => { 
-                setMovies(res.data.results)
+                dispatch(listing({payload: res.data.results}))
                 setTotalPages(res.data.total_pages); 
             })
             .catch(console.error);
         }
     }
-    
-        return (
-            <div class="container">
-                <h2>{title} {text}</h2>
-                <div class="row">
-                    {movies.map( function(movie){
-                    if(movie.poster_path != null) { return <Movie key={movie.id} movie={movie}/>; }
-                    })}
-                </div>
-                <div class="row">
-                    <ReactPaginate
-                            previousLabel={"Anterior"}
-                            nextLabel={"Siguiente"}
-                            breakLabel={"..."}
-                            breakClassName={"break-me"}
-                            pageCount={totalPages}
-                            marginPagesDisplayed={2}
-                            pageRangeDisplayed={5}
-                            forcePage={activePage-1}
-                            onPageChange={handlePageChange}
-                            containerClassName={"pagination"}
-                            subContainerClassName={"pages pagination"}
-                            activeClassName={"active"}
-                        />
-                </div>
-            </div>
-        );
 
+    return (
+        <div class="container">
+            <h2>{title} {text}</h2>
+            <div class="row">
+                <ReactPaginate
+                        previousLabel={"Anterior"}
+                        nextLabel={"Siguiente"}
+                        breakLabel={"..."}
+                        breakClassName={"break-me"}
+                        pageCount={totalPages}
+                        marginPagesDisplayed={2}
+                        pageRangeDisplayed={5}
+                        forcePage={activePage-1}
+                        onPageChange={handlePageChange}
+                        containerClassName={"pagination"}
+                        subContainerClassName={"pages pagination"}
+                        activeClassName={"active"}
+                    />
+            </div>
+            <div class="row">
+                {listMovies.payload&&listMovies.payload.map( function(movie){
+                   if(movie.poster_path != null) { return <Movie key={movie.id} movie={movie}/>; }
+                })}
+            </div>
+            <div class="row">
+                <ReactPaginate
+                        previousLabel={"Anterior"}
+                        nextLabel={"Siguiente"}
+                        breakLabel={"..."}
+                        breakClassName={"break-me"}
+                        pageCount={totalPages}
+                        marginPagesDisplayed={2}
+                        pageRangeDisplayed={5}
+                        forcePage={activePage-1}
+                        onPageChange={handlePageChange}
+                        containerClassName={"pagination"}
+                        subContainerClassName={"pages pagination"}
+                        activeClassName={"active"}
+                    />
+            </div>
+        </div>
+    );
 };
 
 
 export default Movies;
+/*
+
+*/
